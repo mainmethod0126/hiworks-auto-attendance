@@ -1,0 +1,22 @@
+login_api:
+  url: "https://auth-api.office.hiworks.com/office-web/login"
+  id: "test@myorganization.co.kr"
+  pw: "test!23"
+
+work_calendar_api:
+  url: "https://hr-work-api.office.hiworks.com/v4/my-work-data-calendar"
+
+attendance_api:
+  url: "https://hr-timecheck-api.office.hiworks.com/v4/web/time-record"
+
+none_and_pm_off_range:
+  start_time: "08:30:00"
+  end_time: "08:55:00"
+am_off_range:
+  start_time: "13:30:00"
+  end_time: "13:55:00"
+interval: 0
+retry_count: 3
+
+
+
