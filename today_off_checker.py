@@ -26,9 +26,9 @@ def off_check(config_data, cookies):
         if data['work_date'] == current_date:
             if data['day_off_type'] != 0: # 공휴일, 주말일 경우 0이 아님
                 return "full-off"
-            if 'vacation_data' not in data: # 반차, 연차 사용 여부를 위한 판단
+            if 'vacation_data' not in data: # 휴가 사용 여부를 위한 판단
                 return "none"
-            else:
+            else: # 휴가 사용 시, 오전반차, 오후반차, 연차 구분
                 for vacation in data['vacation_data']:
                     if vacation['time_type'] == 'H':
                         if vacation['start_time'] == '09:00:00':

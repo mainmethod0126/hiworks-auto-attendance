@@ -7,14 +7,6 @@ def get_today_off_info(url, cookies):
 
     # 현재 날짜를 가져오기
     current_date = datetime.today().strftime("%Y-%m-%d")
-    full_off_date = "2023-09-07" # 연차 예시
-    pm_off_date = "2023-09-06" # 오후 반차 예시
-    am_off_date = "2023-09-14" # 오전 반차 예시
-    public_holiday = "2023-08-15" # 광복절 예시
-    sunday_date = "2023-08-20" # 일요일 예시
-    saturday_date = "2023-08-19" # 토요일 예시
-
-
 
     # 금일 근무 정보 가져오기
     params = {
