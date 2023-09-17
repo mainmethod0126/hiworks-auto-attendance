@@ -56,5 +56,5 @@ def attendance(config_data, cookies):
 
     login_response = requests.post(attendance_api_url, headers=headers, json=body, cookies=cookies)
     
-    return login_response.status_code == 200
+    return login_response.status_code == 200 or login_response.status_code == 201
 
