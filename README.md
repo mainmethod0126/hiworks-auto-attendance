@@ -48,17 +48,24 @@ retry_count: 3
 
 ### Build
 
+#### dependency install
+
+```bash
+pip install requests
+pip install pyyaml
+```
+
 #### To .exe
 
-#### install pyinstaller
+##### install pyinstaller
 
 `pip install pyinstaller`
 
-#### do build
+##### do build
 
 `pyinstaller hiworks_auto_attendance.py`
 
-#### artifacts path
+##### artifacts path
 
 `<project dir>/dist`
 
