@@ -48,7 +48,7 @@ retry_count: 3
 
 ### Build
 
-#### install dependency
+#### install dependencies
 
 ```bash
 pip install requests
