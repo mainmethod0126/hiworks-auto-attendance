@@ -21,7 +21,10 @@ def attendance_task(none_and_pm_off_target_times, am_off_target_times, config_da
                     result = attendance(config_data, login_response.cookies)
                 
                     if result:
-                        break    
+                        print("----Succeed : 출근 성공!!----")
+                        break
+                    else:
+                        print("----Failed : 출근 실패ㅠㅠㅠㅠ!!----")
             
         for target_time in am_off_target_times:
             
@@ -35,7 +38,11 @@ def attendance_task(none_and_pm_off_target_times, am_off_target_times, config_da
                     result = attendance(config_data, login_response.cookies)
                     
                     if result:
-                        break 
+                        print("----Succeed : 출근 성공!!----")
+                        break
+                    else:
+                        print("----Failed : 출근 실패ㅠㅠㅠㅠ!!----")
+                        
                     
         time.sleep(1)
         
