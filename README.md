@@ -48,6 +48,14 @@ retry_count: 3
 
 ### Build
 
+#### pip upgrade
+
+pip 를 최신으로 유지해주시길 바랍니다.
+
+```bash
+pip install --upgrade pip
+```
+
 #### install dependencies
 
 ```bash
