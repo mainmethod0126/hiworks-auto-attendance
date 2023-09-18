@@ -71,8 +71,8 @@ pip install pyyaml
 
 ### execute
 
-1. `config.yml` 파일을 `<project dir>/dist/hiworks_auto_attendance` 에 생성합니다. 파일 양식을 상단 `config.yml` 항목을 참고해주시면 감사하겠습니다.
-2. `<project dir>/dist/hiworks_auto_attendance/hiworks_auto_attendance.exe` 를 실행합니다
+1. `config.yml` 파일을 `<project dir>/dist/hiworks auto attendance` 에 생성합니다. 파일 양식을 상단 `config.yml` 항목을 참고해주시면 감사하겠습니다.
+2. `<project dir>/dist/hiworks auto attendance/hiworks_auto_attendance.exe` 를 실행합니다
 3. 표준 출력으로 `지금부터 출근 스케줄러가 실행됩니다! target times 에 출근을 시도하니 해당 시간 이후에 출근 여부 확인해주시길 바랍니다` 라는 텍스트가 뜨면 정상적으로 가동
 - **출근 성공시 표준 출력 :** `----Succeed : 출근 성공!!----`
 - **출근 실패시 표준 출력 :** `----Failed : 출근 실패ㅠㅠㅠㅠ!!----`
