@@ -2,6 +2,10 @@ from datetime import datetime
 import requests
 
 def off_check(config_data, cookies):
+    # if (config_data['use_in_progress_approvals']) :
+    #     max_page_number = get_in_progress_approval_max_page_number(config_data, cookies)
+    #     get_today_vacation_approval_by_in_progress_approval(config_data, cookies, max_page_number)
+    
     
     current_date = datetime.today().strftime("%Y-%m-%d")
     
@@ -38,3 +42,68 @@ def off_check(config_data, cookies):
                     elif vacation['time_type'] == 'D':
                         return "full-off"
     return "Invalid work_date"
+
+
+def get_today_vacation_approval_by_in_progress_approval(config_data, cookies, max_page_number):
+    
+    in_progress_approval_api = config_data['in_progress_approval_api']['url']
+    
+    vacation_approvals = []
+    
+    current_date_tmp = datetime.today().strftime("%Y-%m-%d")
+    
+    date_object = datetime.strptime(current_date_tmp, '%Y-%m-%d')
+    
+    
+    kor_date = date_to_kor_date_format(date_object)
+    sample = "청구"
+    
+    for current_page_number in range(1, max_page_number + 1):
+        payload = {
+            "page": str(current_page_number),
+            "pStatus": "P",
+            "pMenu": "get_document_list"
+        }
+
+        response = requests.post(in_progress_approval_api, data=payload, cookies=cookies).json()
+        
+        for approval in response["result"]:
+            # if approval in "휴가 신청" and approval in kor_date:
+            if "치과" in approval["title"] and sample in approval["title"] :
+                vacation_approvals.append(response)
+
+
+
+def get_in_progress_approval_max_page_number(config_data, cookies):
+    in_progress_approval_api = config_data['in_progress_approval_api']['url']
+    
+
+    payload = {
+        "pMenu": "get_approval_count"
+    }
+
+    approval_count = requests.post(in_progress_approval_api, data=payload, cookies=cookies).json()
+    in_progress_approval_count = approval_count["result"]["p"]
+
+    # 한페이지의 리스트 size 는 15가 박혀있는 듯
+    table_item_size = 15
+
+
+    # 페이지는 1부터 시작합니다 그렇기 때문에 + 1합니다
+    max_page_number = int((in_progress_approval_count) / table_item_size) + 1
+
+    return max_page_number
+
+def date_to_kor_date_format(date):
+    
+    # 날짜 객체에서 년, 월, 일을 추출
+    year = date.year
+    month = date.month
+    day = date.day
+    
+    # 변환된 텍스트 반환
+    kor_date = f"{year}년 {month}월 {day}일"
+    return kor_date
+
+
+

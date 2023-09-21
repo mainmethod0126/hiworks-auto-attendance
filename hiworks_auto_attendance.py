@@ -1,13 +1,9 @@
 from datetime import datetime
 
 from target_time_generator import generate_target_times
-from today_work_info_checker import get_today_off_info
-from today_off_checker import off_check
-from login import login
 from attendance_scheduler import attendance_task
 
 import yaml
-import requests
 import threading
 
 
@@ -35,6 +31,9 @@ for target_time in none_and_pm_off_target_times:
 
 for target_time in am_off_target_times:
     print("am_off_target_times : " + target_time.strftime("%H:%M:%S"))
+
+
+
 
 # 쓰레드 시작
 thread = threading.Thread(target=attendance_task, args=(none_and_pm_off_target_times, am_off_target_times, config_data))

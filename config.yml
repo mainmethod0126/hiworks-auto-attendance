@@ -9,6 +9,13 @@ work_calendar_api:
 attendance_api:
   url: "https://hr-timecheck-api.office.hiworks.com/v4/web/time-record"
 
+in_progress_approval_api:
+  url: "https://approval.office.hiworks.com/softcamp.co.kr/approval/document_ajax/"
+
+
+use_in_progress_approvals: true
+
+
 none_and_pm_off_range:
   start_time: "08:30:00"
   end_time: "08:55:00"
