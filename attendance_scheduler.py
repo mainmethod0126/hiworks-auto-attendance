@@ -5,7 +5,7 @@ from login import login
 import requests
 import time
 
-def attendance_task(none_and_pm_off_target_times, am_off_target_times, config_data):
+def attendance_task(none_and_pm_off_target_times, am_off_target_times, config_data, callback_succeed_attendance):
     
     print("지금부터 출근 스케줄러가 실행됩니다!")
     print("target times 에 출근을 시도하니 해당 시간 이후에 출근 여부 확인해주시길 바랍니다.")
@@ -30,7 +30,9 @@ def attendance_task(none_and_pm_off_target_times, am_off_target_times, config_da
                 
                     if result:
                         print("----Succeed : " + current_time + " 출근 성공!!----")
+                        callback_succeed_attendance()
                         break
+                    
                     else:
                         print("----Failed : " + current_time + " 출근 실패ㅠㅠㅠㅠ!!----")
             
@@ -47,7 +49,9 @@ def attendance_task(none_and_pm_off_target_times, am_off_target_times, config_da
                     
                     if result:
                         print("----Succeed : 출근 성공!!----")
+                        callback_succeed_attendance()
                         break
+                    
                     else:
                         print("----Failed : 출근 실패ㅠㅠㅠㅠ!!----")
                         
@@ -72,4 +76,3 @@ def attendance(config_data, cookies):
     login_response = requests.post(attendance_api_url, headers=headers, json=body, cookies=cookies)
     
     return login_response.status_code == 200 or login_response.status_code == 201
-
