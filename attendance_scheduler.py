@@ -1,5 +1,6 @@
 from datetime import datetime
 from today_off_checker import off_check
+
 from login import login
 import requests
 import time
@@ -8,6 +9,9 @@ def attendance_task(none_and_pm_off_target_times, am_off_target_times, config_da
     
     print("지금부터 출근 스케줄러가 실행됩니다!")
     print("target times 에 출근을 시도하니 해당 시간 이후에 출근 여부 확인해주시길 바랍니다.")
+    
+    login_response = login(config_data)
+    today_off_info = off_check(config_data, login_response.cookies)
     
     while True:
         
@@ -25,10 +29,10 @@ def attendance_task(none_and_pm_off_target_times, am_off_target_times, config_da
                     result = attendance(config_data, login_response.cookies)
                 
                     if result:
-                        print("----Succeed : 출근 성공!!----")
+                        print("----Succeed : " + current_time + " 출근 성공!!----")
                         break
                     else:
-                        print("----Failed : 출근 실패ㅠㅠㅠㅠ!!----")
+                        print("----Failed : " + current_time + " 출근 실패ㅠㅠㅠㅠ!!----")
             
         for target_time in am_off_target_times:
             

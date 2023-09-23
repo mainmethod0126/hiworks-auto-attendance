@@ -4,8 +4,6 @@ import random
 
 def generate_target_times(start_time, end_time, interval, retry_count):
     
-    print("start generate_target_times")
-    
     if interval != 0:
         target_times = generate_interver(start_time, end_time, interval, retry_count)
     else:
