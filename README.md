@@ -29,6 +29,7 @@ approval_api:
   sub_url:
     in_progress: approval/document_ajax
 
+use_ssl_verification: true
 use_in_progress_approval: true
 
 none_and_pm_off_range:
@@ -58,6 +59,7 @@ retry_count: 3
 |                          | approval_api.sub_url             | 전자결재 api 의 하위 도메인 url 입니다                                                                                               |
 |                          | approval_api.sub_url.in_progress | 전자결재 api 의 "진행중인 전자결재" 하위 도메인 url 입니다                                                                           |
 | use_in_progress_approval | use_in_progress_approval         | 휴가 당일이 되었는데 휴가 결재가 완료되지 않았을 때 휴가 결재를 상신한 내역만으로 오늘을 휴가로 판단할지 여부입니다                  |
+| use_ssl_verification     | use_ssl_verification             | API 호출 시 SSL 통신에 대한 인증서 검증을 진행할지에 대한 여부입니다. (예: 셀프 서명된 인증서를 사용해야할 경우 false)               |
 
 ### Build
 

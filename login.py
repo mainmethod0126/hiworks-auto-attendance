@@ -14,4 +14,4 @@ def login(config_data):
         "ip_security_level": "1"
     }
 
-    return requests.post(api_url, headers=headers, json=body)
+    return requests.post(api_url, headers=headers, json=body, verify=config_data['use_ssl_verification'])

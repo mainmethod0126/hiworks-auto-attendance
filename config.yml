@@ -15,7 +15,7 @@ approval_api:
     in_progress: approval/document_ajax
       
 
-
+use_ssl_verification: true
 use_in_progress_approval: true
 
 

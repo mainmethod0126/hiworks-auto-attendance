@@ -15,7 +15,7 @@ def off_check(config_data, cookies):
         "page[offset]": 0
     }
 
-    today_work_info_response = requests.get(work_calendar_api_url, params=params, cookies=cookies)
+    today_work_info_response = requests.get(work_calendar_api_url, params=params, cookies=cookies, verify=config_data['use_ssl_verification'])
 
     # JSON 형식의 응답을 파이썬 딕셔너리로 변환
     today_work_info = today_work_info_response.json()
@@ -73,7 +73,7 @@ def get_today_vacation_approval_by_in_progress_approval(config_data, cookies, ma
             "pMenu": "get_document_list"
         }
 
-        response_json = requests.post(in_progress_approval_api, data=payload, cookies=cookies).json()
+        response_json = requests.post(in_progress_approval_api, data=payload, cookies=cookies, verify=config_data['use_ssl_verification']).json()
         
         for approval in response_json["result"]:
             if "휴가 신청" in approval["title"] and date_kor_format in approval["title"] :
@@ -84,7 +84,7 @@ def get_view(config_data, cookies, approval):
     
     approval_view_url = config_data['approval_api']['base_url'] + '/' +'approval/document/view/' + approval_no + '/condition'
     
-    response = requests.get(approval_view_url, cookies=cookies)
+    response = requests.get(approval_view_url, cookies=cookies, verify=config_data['use_ssl_verification'])
     
     return response.text
 
@@ -97,7 +97,8 @@ def get_in_progress_approval_max_page_number(config_data, cookies):
         "pMenu": "get_approval_count"
     }
 
-    approval_count = requests.post(in_progress_approval_api, data=payload, cookies=cookies).json()
+
+    approval_count = requests.post(in_progress_approval_api, data=payload, cookies=cookies, verify=config_data['use_ssl_verification']).json()
     in_progress_approval_count = approval_count["result"]["p"]
 
     # 한페이지의 리스트 size 는 15가 박혀있는 듯
