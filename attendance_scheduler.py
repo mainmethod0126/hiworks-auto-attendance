@@ -2,6 +2,7 @@ from datetime import datetime
 from today_off_checker import off_check
 
 from login import login
+
 import requests
 import time
 
@@ -73,6 +74,6 @@ def attendance(config_data, cookies):
         }
     }
 
-    login_response = requests.post(attendance_api_url, headers=headers, json=body, cookies=cookies)
+    login_response = requests.post(attendance_api_url, headers=headers, json=body, cookies=cookies, verify=config_data['use_ssl_verification'])
     
     return login_response.status_code == 200 or login_response.status_code == 201
