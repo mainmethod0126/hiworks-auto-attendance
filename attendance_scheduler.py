@@ -56,7 +56,7 @@ def attendance_task(
                         is_attended = True
                         break
 
-        if is_attended:
+        if is_attended == False:
             for target_time in am_off_target_times:
                 if current_time == target_time.strftime("%H:%M:%S"):
                 
