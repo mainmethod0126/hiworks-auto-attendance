@@ -25,12 +25,14 @@ def attendance_task(
     while True:
         current_time = datetime.today().strftime("%H:%M:%S")
 
+        is_attended = False
+
         for target_time in none_and_pm_off_target_times:
             if current_time == target_time.strftime("%H:%M:%S"):
                 login_result = ApiClient.get_instance().login()
 
                 if login_result.is_err():
-                    logging.error("하이웍스 로그인에 실패하였습니다")
+                    logging.error("로그인에 실패하였습니다")
                     continue
 
                 today_off_info_result = ApiClient.get_instance().off_check(
@@ -51,36 +53,38 @@ def attendance_task(
                     else:
                         print("----Succeed : " + current_time + " 출근 성공!!----")
                         callback_succeed_attendance()
+                        is_attended = True
                         break
 
-        for target_time in am_off_target_times:
-            if current_time == target_time.strftime("%H:%M:%S"):
-            
-                login_result = ApiClient.get_instance().login()
+        if is_attended:
+            for target_time in am_off_target_times:
+                if current_time == target_time.strftime("%H:%M:%S"):
+                
+                    login_result = ApiClient.get_instance().login()
 
-                if login_result.is_err():
-                    logging.error("하이웍스 로그인에 실패하였습니다")
-                    continue
+                    if login_result.is_err():
+                        logging.error("하이웍스 로그인에 실패하였습니다")
+                        continue
 
 
-                today_off_info_result = ApiClient.get_instance().off_check(
-                    login_result.ok().cookies
-                )
+                    today_off_info_result = ApiClient.get_instance().off_check(
+                        login_result.ok().cookies
+                    )
 
-                if today_off_info_result.is_err():
-                    logging.error("금일 휴가 사용 여부 획득에 실패하였습니다")
-                    continue
+                    if today_off_info_result.is_err():
+                        logging.error("금일 휴가 사용 여부 획득에 실패하였습니다")
+                        continue
 
-                # am-off
-                if today_off_info_result.ok() == "am-off":
-                    attendance_result = ApiClient.get_instance().attendance(login_result.ok().cookies)
+                    # am-off
+                    if today_off_info_result.ok() == "am-off":
+                        attendance_result = ApiClient.get_instance().attendance(login_result.ok().cookies)
 
-                    if attendance_result.is_err():
-                        print("----Failed : " + current_time + " 출근 실패ㅠㅠㅠㅠ----")
+                        if attendance_result.is_err():
+                            print("----Failed : " + current_time + " 출근 실패ㅠㅠㅠㅠ----")
 
-                    else:
-                        print("----Succeed : " + current_time + " 출근 성공!!----")
-                        callback_succeed_attendance()
-                        break
+                        else:
+                            print("----Succeed : " + current_time + " 출근 성공!!----")
+                            callback_succeed_attendance()
+                            break
 
         time.sleep(1)
