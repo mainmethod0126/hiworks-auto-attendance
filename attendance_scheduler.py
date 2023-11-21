@@ -63,7 +63,7 @@ def attendance_task(
                     login_result = ApiClient.get_instance().login()
 
                     if login_result.is_err():
-                        logging.error("하이웍스 로그인에 실패하였습니다")
+                        logging.error("로그인에 실패하였습니다")
                         continue
 
 
