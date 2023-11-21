@@ -33,9 +33,6 @@ class ApiClient:
             )
         self.config_data = config_data
 
-
-
-
     @classmethod
     def get_instance(cls) -> "ApiClient":
         if cls._instance is None:
@@ -97,7 +94,7 @@ class ApiClient:
         for data in datas:
             if data["work_date"] == current_date:
                 if data["day_off_type"] != 0:  # 주말,공휴일 여부를 확인하기 위함 (주말 또는 공휴일이면 0이 아님)
-                    return ResultBuilder().ok().value("full-off").build() 
+                    return ResultBuilder().ok().value("full-off").build()
 
                 if self.config_data[
                     "use_in_progress_approval"
@@ -111,31 +108,29 @@ class ApiClient:
                         )
                     )
 
-                    if approval is None:
-                        return ResultBuilder().ok().value("none").build()  # 휴가가 아님
+                    if approval is not None:
+                        html_text = self.__get_view(cookies, approval)
 
-                    html_text = self.__get_view(cookies, approval)
+                        if "09:00~14:00" in html_text:
+                            return ResultBuilder().ok().value("am-off").build()
+                        elif "14:00~18:00" in html_text:
+                            return ResultBuilder().ok().value("pm-off").build()
+                        elif "종일" in html_text:
+                            return ResultBuilder().ok().value("full-off").build()
 
-                    if "09:00~14:00" in html_text:
-                        return ResultBuilder().ok().value("am-off").build()
-                    elif "14:00~18:00" in html_text:
-                        return ResultBuilder().ok().value("pm-off").build()
-                    elif "종일" in html_text:
-                        return ResultBuilder().ok().value("full-off").build()
-                else:
-                    if (
-                        "vacation_data" not in data
-                    ):  # 휴가 사용 여부를 "주간 캘린더"에서 확인합니다 (특징 : 휴가 결재가 사전에 완료되어있어야 함)
-                        return ResultBuilder().ok().value("none").build()
-                    else:  # 휴가 사용 시, 오전반차, 오후반차, 연차 구분
-                        for vacation in data["vacation_data"]:
-                            if vacation["time_type"] == "H":
-                                if vacation["start_time"] == "09:00:00":
-                                    return ResultBuilder().ok().value("am-off").build()
-                                elif vacation["start_time"] == "14:00:00":
-                                    return ResultBuilder().ok().value("pm-off").build() 
-                            elif vacation["time_type"] == "D":
-                                return ResultBuilder().ok().value("full-off").build()
+                if (
+                    "vacation_data" not in data
+                ):  # 휴가 사용 여부를 "주간 캘린더"에서 확인합니다 (특징 : 휴가 결재가 사전에 완료되어있어야 함)
+                    return ResultBuilder().ok().value("none").build()
+                else:  # 휴가 사용 시, 오전반차, 오후반차, 연차 구분
+                    for vacation in data["vacation_data"]:
+                        if vacation["time_type"] == "H":
+                            if vacation["start_time"] == "09:00:00":
+                                return ResultBuilder().ok().value("am-off").build()
+                            elif vacation["start_time"] == "14:00:00":
+                                return ResultBuilder().ok().value("pm-off").build()
+                        elif vacation["time_type"] == "D":
+                            return ResultBuilder().ok().value("full-off").build()
         return ResultBuilder().err().value("Invalid work_date").build()
 
     def attendance(self, cookies) -> Result:
@@ -154,8 +149,12 @@ class ApiClient:
             verify=self.config_data["use_ssl_verification"],
         )
 
-        return  ResultBuilder.ok().value(True).build() if attendance_response.status_code == 200 or attendance_response.status_code == 201 else ResultBuilder.err().value(False).build()
-
+        return (
+            ResultBuilder.ok().value(True).build()
+            if attendance_response.status_code == 200
+            or attendance_response.status_code == 201
+            else ResultBuilder.err().value(False).build()
+        )
 
     def __get_today_vacation_approval_by_in_progress_approval(
         self, cookies, max_page_number, current_date
