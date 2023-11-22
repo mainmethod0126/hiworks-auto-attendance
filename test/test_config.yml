@@ -1,0 +1,32 @@
+login_api:
+  url: "https://auth-api.office.hiworks.com/office-web/login"
+  id: "aaaaa.shin@softcamp.co.kr"
+  pw: "aaaaa123!@#"
+
+work_calendar_api:
+  url: "https://hr-work-api.office.hiworks.com/v4/my-work-data-calendar"
+
+attendance_api:
+  url: "https://hr-timecheck-api.office.hiworks.com/v4/web/time-record"
+
+approval_api:
+  base_url: "https://approval.office.hiworks.com/softcamp.co.kr"
+  sub_url:
+    in_progress: approval/document_ajax
+      
+
+use_ssl_verification: true
+use_in_progress_approval: true
+
+
+none_and_pm_off_range:
+  start_time: "08:30:00"
+  end_time: "08:55:00"
+am_off_range:
+  start_time: "13:30:00"
+  end_time: "13:55:00"
+interval: 0
+retry_count: 3
+
+
+
