@@ -57,7 +57,21 @@ class ResultBuilder:
         return cls.FieldBuilder(result)
 
     @classmethod
+    def ok(cls, value):
+        result = Result()
+        result._status = True
+        result._value = value
+        return cls.FieldBuilder(result)
+
+    @classmethod
     def err(cls):
         result = Result()
         result._status = False
+        return cls.FieldBuilder(result)
+
+    @classmethod
+    def err(cls, value):
+        result = Result()
+        result._status = False
+        result._value = value
         return cls.FieldBuilder(result)

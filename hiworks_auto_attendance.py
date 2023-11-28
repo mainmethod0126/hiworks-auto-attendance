@@ -12,6 +12,7 @@ import threading
 with open('config.yml', 'r') as config_file:
     config_data = yaml.safe_load(config_file)
 
+
 none_and_pm_off_target_times = []
 am_off_target_times = []
 
@@ -29,7 +30,7 @@ def reset_target_times():
     
     global none_and_pm_off_target_times
     global am_off_target_times
-    
+
     none_and_pm_off_target_times = generate_target_times(none_and_pm_off_start_time, none_and_pm_off_end_time, interval, retry_count)
     am_off_target_times = generate_target_times(am_off_start_time, am_off_end_time, interval, retry_count)
 
