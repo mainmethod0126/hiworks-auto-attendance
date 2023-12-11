@@ -19,7 +19,7 @@ class Result:
     def force_ok(self):
         return self._value
 
-    def else_err(self, err_handler: callable):
+    def else_err(self, err_handler: callable): # type: ignore
         if self._status == False:
             return err_handler()
 
@@ -27,6 +27,12 @@ class Result:
     
     def is_err(self):
         if self._status == False:
+            return True
+
+        return False
+    
+    def is_ok(self):
+        if self._status == True:
             return True
 
         return False
@@ -50,27 +56,17 @@ class ResultBuilder:
         def build(self):
             return self._result
 
-    @classmethod
-    def ok(cls):
-        result = Result()
-        result._status = True
-        return cls.FieldBuilder(result)
 
     @classmethod
-    def ok(cls, value):
+    def ok(cls, value = None):
         result = Result()
         result._status = True
         result._value = value
         return cls.FieldBuilder(result)
 
-    @classmethod
-    def err(cls):
-        result = Result()
-        result._status = False
-        return cls.FieldBuilder(result)
 
     @classmethod
-    def err(cls, value):
+    def err(cls, value = None):
         result = Result()
         result._status = False
         result._value = value
