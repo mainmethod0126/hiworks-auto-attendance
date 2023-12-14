@@ -36,10 +36,6 @@ def test_off_check_given_registered_account_when_off_check_request_then_result_i
 
     login_result = ApiClient.get_instance().login()
 
-    if login_result.is_err():
-        print("하이웍스 로그인에 실패하였습니다")
-        return
-
     today_off_info_result = ApiClient.get_instance().off_check(
         login_result.ok()
     )
