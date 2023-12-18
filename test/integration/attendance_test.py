@@ -11,12 +11,13 @@ from datetime import datetime
 login_id = "aaaa@softcamp.co.kr"
 login_pw = "aaaa123!@#"
 
+
 def test_login_given_unregistered_account_when_login_request_then_result_is_err_true():
     """
     미등록된 계정으로 하이웍스 로그인 시 로그인 실패합니다.
     """
-    config_data["login_api"]["id"] = login_id
-    config_data["login_api"]["pw"] = login_pw
+    config_data["login_api"]["id"] = 'aaaa'
+    config_data["login_api"]["pw"] = 'bbbb'
 
     ApiClient.get_instance().set_config_data(config_data)
 
@@ -37,7 +38,7 @@ def test_off_check_given_registered_account_when_off_check_request_then_result_i
     login_result = ApiClient.get_instance().login()
 
     today_off_info_result = ApiClient.get_instance().off_check(
-        login_result.ok()
+        login_result.ok().cookies # type: ignore
     )
 
     assert today_off_info_result.is_err() is False
