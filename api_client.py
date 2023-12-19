@@ -1,12 +1,8 @@
 from datetime import datetime
 from result import ResultBuilder
 from result import Result
+from config_module import get_config_data
 
-import yaml
-
-# config.yml 파일 읽기
-with open("config.yml", "r") as config_file:
-    config_data = yaml.safe_load(config_file)
 
 import requests
 import re
@@ -26,17 +22,17 @@ class ApiClientMeta(type):
 class ApiClient:
     _instance = None
 
-    def __init__(self, config_data) -> None:
+    def __init__(self) -> None:
         if self._instance is not None:
             raise SingletonError(
                 "ApiClient is a singleton class. Use get_instance() method to get the instance."
             )
-        self.config_data = config_data
+        self.config_data = get_config_data()
 
     @classmethod
     def get_instance(cls) -> "ApiClient":
         if cls._instance is None:
-            cls._instance = cls(config_data)
+            cls._instance = cls()
         return cls._instance
 
     # 테스트를 위해서 외부에서 config_data를 주입할 수 있도록 하였습니다.
