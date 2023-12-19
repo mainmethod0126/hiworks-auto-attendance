@@ -5,11 +5,25 @@ from attendance_scheduler import attendance_task
 
 import yaml
 import threading
+import os
+import argparse
+import sys
+
+# argparse를 사용하여 명령행 인자 파싱
+parser = argparse.ArgumentParser(description='Script description')
+parser.add_argument('-config', help='Path to the config file')
+args = parser.parse_args()
 
 
 
-# config.yml 파일 읽기
-with open('config.yml', 'r') as config_file:
+# -config 옵션으로 전달된 값이 있는지 확인하고, 없으면 디폴트 경로 사용
+config_path = args.config if args.config else os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), 'config.yml')
+    
+print("config_path : " + config_path)
+    
+
+# config 파일 읽기
+with open(config_path, 'r') as config_file:
     config_data = yaml.safe_load(config_file)
 
 none_and_pm_off_target_times = []
