@@ -1,10 +1,11 @@
 from unittest import mock
 
-import pytest
 import requests
 
+from config_module import load_config, get_config_data
+
+
 from api_client import ApiClient
-from api_client import config_data
 from attendance_scheduler import do_attendance
 from datetime import datetime
 
@@ -12,10 +13,24 @@ login_id = "aaaa@softcamp.co.kr"
 login_pw = "aaaa123!@#"
 
 
+def test_get_config_data():
+    config_path = 'config.yml'
+    
+    # config를 모듈에 로딩
+    load_config(config_path)
+
+    # config 데이터 얻기
+    return get_config_data()
+
+
 def test_login_given_unregistered_account_when_login_request_then_result_is_err_true():
+
     """
     미등록된 계정으로 하이웍스 로그인 시 로그인 실패합니다.
     """
+    config_data = test_get_config_data()
+
+    
     config_data["login_api"]["id"] = 'aaaa'
     config_data["login_api"]["pw"] = 'bbbb'
 
@@ -29,6 +44,7 @@ def test_off_check_given_registered_account_when_off_check_request_then_result_i
     """
     등록된 계정으로 오늘의 휴가 정보를 획득할 때 획득에 성공합니다
     """
+    config_data = test_get_config_data()
     
     config_data["login_api"]["id"] = login_id
     config_data["login_api"]["pw"] = login_pw
@@ -49,6 +65,7 @@ def test_attendance_given_login_false_when_attendance_then_not_throw_exception()
     """
     로그인 실패 시 출근 로직에서 익셉션이 발생하지 않습니다
     """
+    config_data = test_get_config_data()
     
     # given
     config_data["login_api"]["id"] = login_id
@@ -88,6 +105,8 @@ def test_attendance_given_today_work_info_response_false_when_attendance_then_no
     금일 출근 정보 조회 실패 시 출근 로직에서 익셉션이 발생하지 않습니다
     """
     
+    config_data = test_get_config_data()
+    
     # given
     config_data["login_api"]["id"] = login_id
     config_data["login_api"]["pw"] = login_pw
@@ -126,6 +145,8 @@ def test_attendance_given_get_in_progress_approval_max_page_number_response_fals
     """
     결재 진행중인 휴가 신청서 리스트의 끝 페이지 넘버 조회 실패 시 출근 로직에서 익셉션이 발생하지 않습니다
     """
+    
+    config_data = test_get_config_data()
     
     # given
     config_data["login_api"]["id"] = login_id
@@ -172,6 +193,8 @@ def test_attendance_given_get_in_progress_approval_response_false_when_attendanc
     """
     결재 진행중인 휴가 신청서 조회 실패 시 출근 로직에서 익셉션이 발생하지 않습니다
     """
+    
+    config_data = test_get_config_data()
     
     # given
     config_data["login_api"]["id"] = login_id
