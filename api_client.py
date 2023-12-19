@@ -1,12 +1,8 @@
 from datetime import datetime
 from result import ResultBuilder
 from result import Result
+from config_module import get_config_data
 
-import yaml
-
-# config.yml 파일 읽기
-with open("config.yml", "r") as config_file:
-    config_data = yaml.safe_load(config_file)
 
 import requests
 import re
@@ -26,17 +22,17 @@ class ApiClientMeta(type):
 class ApiClient:
     _instance = None
 
-    def __init__(self, config_data) -> None:
+    def __init__(self) -> None:
         if self._instance is not None:
             raise SingletonError(
                 "ApiClient is a singleton class. Use get_instance() method to get the instance."
             )
-        self.config_data = config_data
+        self.config_data = get_config_data()
 
     @classmethod
     def get_instance(cls) -> "ApiClient":
         if cls._instance is None:
-            cls._instance = cls(config_data)
+            cls._instance = cls()
         return cls._instance
 
     # 테스트를 위해서 외부에서 config_data를 주입할 수 있도록 하였습니다.
@@ -60,9 +56,9 @@ class ApiClient:
         )
 
         if response.status_code != 200:
-            return ResultBuilder.err().build()
+            return ResultBuilder.err("하이웍스 로그인 요청의 응답 상태 코드가 200이 아닙니다").build()
         else:
-            return ResultBuilder.ok().value(response).build()
+            return ResultBuilder.ok(response).build()
 
     def off_check(self, cookies) -> Result:
         current_date = datetime.today().strftime("%Y-%m-%d")
@@ -82,8 +78,9 @@ class ApiClient:
             cookies=cookies,
             verify=self.config_data["use_ssl_verification"],
         )
+
         if today_work_info_response.status_code != 200:
-            return ResultBuilder().err().value("금일 근무 계획 정보를 얻어오지 못했습니다.").build()
+            return ResultBuilder().err("금일 근무 계획 정보를 얻어오지 못했습니다.").build()
 
         # JSON 형식의 응답을 파이썬 딕셔너리로 변환
         today_work_info = today_work_info_response.json()
@@ -94,7 +91,7 @@ class ApiClient:
         for data in datas:
             if data["work_date"] == current_date:
                 if data["day_off_type"] != 0:  # 주말,공휴일 여부를 확인하기 위함 (주말 또는 공휴일이면 0이 아님)
-                    return ResultBuilder().ok().value("full-off").build()
+                    return ResultBuilder().ok("full-off").build()
 
                 if self.config_data[
                     "use_in_progress_approval"
@@ -102,36 +99,35 @@ class ApiClient:
                     max_number = self.__get_in_progress_approval_max_page_number(
                         cookies
                     )
-                    approval = (
-                        self.__get_today_vacation_approval_by_in_progress_approval(
-                            cookies, max_number, current_date
-                        )
-                    )
+                    
+                    if max_number.is_ok(): 
+                        approval_result = self.__get_today_vacation_approval_by_in_progress_approval(
+                                cookies, max_number.ok(), current_date
+                            )
+                        if approval_result.is_ok():
+                            html_text = self.__get_view(cookies, approval_result.ok()).ok()
 
-                    if approval is not None:
-                        html_text = self.__get_view(cookies, approval)
-
-                        if "09:00~14:00" in html_text:
-                            return ResultBuilder().ok().value("am-off").build()
-                        elif "14:00~18:00" in html_text:
-                            return ResultBuilder().ok().value("pm-off").build()
-                        elif "종일" in html_text:
-                            return ResultBuilder().ok().value("full-off").build()
+                            if "09:00~14:00" in html_text:  # type: ignore
+                                return ResultBuilder().ok("am-off").build()
+                            elif "14:00~18:00" in html_text:  # type: ignore
+                                return ResultBuilder().ok("pm-off").build()
+                            elif "종일" in html_text:  # type: ignore
+                                return ResultBuilder().ok("full-off").build()
 
                 if (
                     "vacation_data" not in data
                 ):  # 휴가 사용 여부를 "주간 캘린더"에서 확인합니다 (특징 : 휴가 결재가 사전에 완료되어있어야 함)
-                    return ResultBuilder().ok().value("none").build()
+                    return ResultBuilder().ok("none").build()
                 else:  # 휴가 사용 시, 오전반차, 오후반차, 연차 구분
                     for vacation in data["vacation_data"]:
                         if vacation["time_type"] == "H":
                             if vacation["start_time"] == "09:00:00":
-                                return ResultBuilder().ok().value("am-off").build()
+                                return ResultBuilder().ok("am-off").build()
                             elif vacation["start_time"] == "14:00:00":
-                                return ResultBuilder().ok().value("pm-off").build()
+                                return ResultBuilder().ok("pm-off").build()
                         elif vacation["time_type"] == "D":
-                            return ResultBuilder().ok().value("full-off").build()
-        return ResultBuilder().err().value("Invalid work_date").build()
+                            return ResultBuilder().ok("full-off").build()
+        return ResultBuilder().err("Invalid work_date").build()
 
     def attendance(self, cookies) -> Result:
         # -----------------------출근--------------------------
@@ -150,15 +146,19 @@ class ApiClient:
         )
 
         return (
-            ResultBuilder.ok().value(True).build()
+            ResultBuilder.ok(True).build()
             if attendance_response.status_code == 200
             or attendance_response.status_code == 201
-            else ResultBuilder.err().value(False).build()
+            else ResultBuilder.err(
+                "출근 요청에 대한 response 상태 코드가 "
+                + str(attendance_response.status_code)
+                + " 입니다"
+            ).build()
         )
 
     def __get_today_vacation_approval_by_in_progress_approval(
         self, cookies, max_page_number, current_date
-    ):
+    ) -> Result:
         in_progress_approval_api = (
             self.config_data["approval_api"]["base_url"]
             + "/"
@@ -177,22 +177,34 @@ class ApiClient:
                 "pMenu": "get_document_list",
             }
 
-            response_json = requests.post(
+            response = requests.post(
                 in_progress_approval_api,
                 data=payload,
                 cookies=cookies,
                 verify=self.config_data["use_ssl_verification"],
-            ).json()
+            )
+
+            if response.status_code != 200:
+                return ResultBuilder.err("결재 진행중인 휴가 신청서 조회를 요청하였지만 결과가 200이 아닙니다").build()
+
+            response_json = response.json()
 
             for approval in response_json["result"]:
                 if (
                     "휴가 신청" in approval["title"]
                     and date_kor_format in approval["title"]
                 ):
-                    return approval
+                    return ResultBuilder.ok(approval).build()
 
-    def __get_view(self, cookies, approval):
-        approval_no = re.search(r"\d+", approval["link"]).group()
+        return ResultBuilder.err("결재가 진행중인 휴가 신청서가 없습니다").build()
+
+    def __get_view(self, cookies, approval) -> Result:
+        searched = re.search(r"\d+", approval["link"])
+
+        if searched is None:
+            return ResultBuilder.err("휴가 신청서 번호를 찾을 수 없습니다").build()
+
+        approval_no = searched.group()
 
         approval_view_url = (
             self.config_data["approval_api"]["base_url"]
@@ -208,9 +220,9 @@ class ApiClient:
             verify=self.config_data["use_ssl_verification"],
         )
 
-        return response.text
+        return ResultBuilder.ok(response.text).build()
 
-    def __get_in_progress_approval_max_page_number(self, cookies):
+    def __get_in_progress_approval_max_page_number(self, cookies) -> Result:
         in_progress_approval_api = (
             self.config_data["approval_api"]["base_url"]
             + "/"
@@ -219,12 +231,18 @@ class ApiClient:
 
         payload = {"pMenu": "get_approval_count"}
 
-        approval_count = requests.post(
+        response = requests.post(
             in_progress_approval_api,
             data=payload,
             cookies=cookies,
             verify=self.config_data["use_ssl_verification"],
-        ).json()
+        )
+
+        if response.status_code != 200:
+            return ResultBuilder.err("결재 진행중인 휴가 신청서 리스트의 총 페이지 사이즈를 조회하는데 실패하였습니다").build()
+
+        approval_count = response.json()
+
         in_progress_approval_count = approval_count["result"]["p"]
 
         # 한페이지의 리스트 size 는 15가 박혀있는 듯
@@ -233,7 +251,7 @@ class ApiClient:
         # 페이지는 1부터 시작합니다 그렇기 때문에 + 1합니다
         max_page_number = int((in_progress_approval_count) / table_item_size) + 1
 
-        return max_page_number
+        return ResultBuilder.ok(max_page_number).build()
 
     def __date_to_kor_date_format(self, date):
         # 날짜 객체에서 년, 월, 일을 추출
