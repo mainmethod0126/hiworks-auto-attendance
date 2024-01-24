@@ -1,4 +1,8 @@
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor
+
+
+
 
 from datetime import datetime
 from api_client import ApiClient
@@ -14,6 +18,17 @@ logging.basicConfig(
 )
 
 
+# 순차적으로 실행되는 스케줄러 설정
+executors = {
+    'default': ThreadPoolExecutor(1)  # 스레드 풀의 크기를 1로 설정
+}
+
+
+
+# 스케줄러의 스레드를 하나로 지정하여, 동일 시간으로 등록되어있을 경우 병렬이 아닌 순차적 실행되 되도록 하기 위함
+scheduler = BackgroundScheduler(executors=executors)
+scheduler.start()
+
 class ApiErrException(Exception):
     pass
 
@@ -22,7 +37,17 @@ def api_err_handler():
     raise ApiErrException("API 호출 결과가 Failed입니다")
 
 
-def reset_scheduler():
+
+
+def run():
+    print("지금부터 출근 스케줄러가 실행됩니다!")
+    print("target times 에 출근을 시도하니 해당 시간 이후에 출근 여부 확인해주시길 바랍니다.")
+    
+    reset_scheduler()
+
+
+
+def reset_target_times():
     config_data = get_config_data()
 
     # -----------------------target times 생성--------------------------
@@ -59,44 +84,33 @@ def reset_scheduler():
     for target_time in am_off_target_times:
         print("am_off_target_times : " + target_time.strftime("%H:%M:%S"))
 
+def reset_scheduler():
 
-def run(none_and_pm_off_target_times, am_off_target_times, callback_succeed_attendance):
-    # 스케줄러 초기화
-    scheduler = BackgroundScheduler()
-
+    scheduler.remove_all_jobs()
+    
+    reset_target_times()
+    
     for target_time in none_and_pm_off_target_times:
         scheduler.add_job(
-            attendance_task,
+            none_and_pm_off_attendance,
             "date",
             run_date=target_time,
             id=target_time.strftime("%H:%M:%S"),
+            args=[target_time, reset_scheduler]
         )
 
     for target_time in am_off_target_times:
-        print(target_time)
-
-    scheduler.start()
-
-
-def attendance_task(
-    none_and_pm_off_target_times, am_off_target_times, callback_succeed_attendance
-):
-    print("지금부터 출근 스케줄러가 실행됩니다!")
-    print("target times 에 출근을 시도하니 해당 시간 이후에 출근 여부 확인해주시길 바랍니다.")
+        scheduler.add_job(
+            am_off_attendance,
+            "date",
+            run_date=target_time,
+            id=target_time.strftime("%H:%M:%S"),
+            args=[target_time, reset_scheduler]
+        )
+        
 
 
-# def do_attendance(
-#     callback_succeed_attendance
-# ):
-#     try:
 
-
-#         is_attended = False
-
-#         if is_attended == False:
-
-#     except Exception as e:
-#         print("스케줄러 동작 중에 예외가 발생하였으나, 스케줄러는 항상 실행되어야 하기에 익셉션을 방출하지 않고 로그만 기록합니다 " + e)  # type: ignore
 
 
 # 정상 출근 / 오후 반차
@@ -117,7 +131,7 @@ def none_and_pm_off_attendance(current_time, callback_succeed_attendance):
 
     # none || pm-off
     if today_off_info_result.ok() == "none" or today_off_info_result.ok() == "pm-off":
-        attendance_result = ApiClient.get_instance().attendance(login_result.ok().cookies)  # type: ignore
+        attendance_result = ApiClient.get_instance().attendance(login_result    .ok().cookies)  # type: ignore
 
         if attendance_result.is_err():
             print("----Failed : " + current_time + " 출근 실패ㅠㅠㅠㅠ----")
