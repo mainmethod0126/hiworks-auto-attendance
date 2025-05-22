@@ -135,7 +135,7 @@ class ApiClient:
 
         headers = {"Content-Type": "application/json"}
 
-        body = {"data": {"type": "1"}}
+        body = {"type": "1"}
 
         attendance_response = requests.post(
             attendance_api_url,
